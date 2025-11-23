@@ -1,0 +1,328 @@
+/* ---------- Global ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {
+  background: #0b1120;
+  color: #f1f5f9;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* ---------- Container ---------- */
+.container {
+  margin-top: 3rem;
+  margin-bottom: 3rem;
+  width: 90%;
+  max-width: 900px;
+  text-align: center;
+  padding: 2.5rem;
+  border: 2px solid #22d3ee;
+  border-radius: 1.4rem;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 0 30px rgba(34, 211, 238, 0.25);
+  transition: all 0.4s ease;
+}
+
+.container:hover {
+  box-shadow: 0 0 40px rgba(34, 211, 238, 0.45);
+}
+
+/* ---------- Hero Section ---------- */
+.hero {
+  margin-bottom: 3rem;
+}
+
+.site-logo {
+  width: 120px;
+  margin-bottom: 1.6rem;
+  transition: transform 0.3s ease;
+}
+
+.site-logo:hover {
+  transform: scale(1.1);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #22d3ee;
+}
+
+.tagline {
+  font-size: 1rem;
+  color: #94a3b8;
+  margin-top: 0.5rem;
+}
+
+/* ---------- Cards ---------- */
+.cards-section {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  backdrop-filter: blur(10px);
+  width: 260px;
+  padding: 1.5rem;
+  text-align: left;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.card h2 {
+  color: #22d3ee;
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+}
+
+.card ul {
+  list-style: disc;
+  margin-left: 1.5rem;
+  color: #cbd5e1;
+}
+
+/* ---------- CTA Line ---------- */
+.cta-line {
+  display: block;
+  margin-top: 2.5rem;
+  font-weight: 500;
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+/* ---------- Input Section ---------- */
+.input-section {
+  background: rgba(30, 41, 59, 0.6);
+  border-radius: 1rem;
+  padding: 2rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.input-section h2 {
+  color: #22d3ee;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+textarea {
+  width: 100%;
+  min-height: 120px;
+  border-radius: 0.5rem;
+  border: 1px solid #334155;
+  background-color: #1e293b;
+  color: #f1f5f9;
+  padding: 0.8rem;
+  resize: none;
+}
+
+textarea:focus {
+  outline: 2px solid #22d3ee;
+}
+
+.form-help {
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+/* ---------- Predict Button ---------- */
+.predict-button {
+  background-color: #22d3ee;
+  border: none;
+  border-radius: 0.5rem;
+  color: #0f172a;
+  font-weight: 600;
+  padding: 0.8rem 1.8rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.predict-button:hover {
+  background-color: #06b6d4;
+}
+
+/* ---------- Result Section ---------- */
+.result-section {
+  margin-top: 2rem;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: rgba(30, 41, 59, 0.8);
+}
+
+.result-section.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.result-section h3 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.result-section p {
+  color: #cbd5e1;
+  margin-bottom: 0.5rem;
+}
+
+.confidence {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* 🚨 HIGH RISK / FAKE - RED */
+.result-section.high-risk {
+  border: 2px solid #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+}
+
+.result-section.high-risk h3 {
+  color: #ef4444;
+}
+
+.result-section.high-risk .confidence {
+  color: #fca5a5;
+}
+
+.result-section.high-risk .prediction-content {
+  color: #fecaca;
+}
+
+/* ⚠️ SUSPICIOUS - ORANGE/YELLOW */
+.result-section.suspicious {
+  border: 2px solid #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+}
+
+.result-section.suspicious h3 {
+  color: #f59e0b;
+}
+
+.result-section.suspicious .confidence {
+  color: #fcd34d;
+}
+
+.result-section.suspicious .prediction-content {
+  color: #fef3c7;
+}
+
+/* 🔍 CAUTION / NEEDS REVIEW - YELLOW */
+.result-section.caution {
+  border: 2px solid #eab308;
+  background: rgba(234, 179, 8, 0.1);
+  box-shadow: 0 0 20px rgba(234, 179, 8, 0.3);
+}
+
+.result-section.caution h3 {
+  color: #eab308;
+}
+
+.result-section.caution .confidence {
+  color: #fde047;
+}
+
+.result-section.caution .prediction-content {
+  color: #fef9c3;
+}
+
+/* ✅ LIKELY SAFE - GREEN */
+.result-section.safe {
+  border: 2px solid #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+}
+
+.result-section.safe h3 {
+  color: #22c55e;
+}
+
+.result-section.safe .confidence {
+  color: #86efac;
+}
+
+.result-section.safe .prediction-content {
+  color: #dcfce7;
+}
+
+/* ✅ VERY LIKELY SAFE - BRIGHT GREEN */
+.result-section.very-safe {
+  border: 2px solid #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+.result-section.very-safe h3 {
+  color: #10b981;
+}
+
+.result-section.very-safe .confidence {
+  color: #6ee7b7;
+}
+
+.result-section.very-safe .prediction-content {
+  color: #d1fae5;
+}
+
+/* Prediction content styling */
+.prediction-content {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.prediction-content h4 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.prediction-content ul {
+  text-align: left;
+  margin-left: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prediction-content .advice {
+  font-style: italic;
+  margin-top: 0.5rem;
+}
+
+/* Error state */
+.result-section .error {
+  color: #ef4444;
+  font-weight: 500;
+}
+

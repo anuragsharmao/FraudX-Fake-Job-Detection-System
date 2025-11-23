@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudX - Fake Job Detection System</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- HERO SECTION -->
+        <section class="hero">
+            <img src="fraudXlogo.jpg" alt="FraudX logo" class="site-logo">
+
+            <h1>Fake Job Detection System</h1>
+            <p class="tagline">Stay safe, apply smart — Detect fake jobs instantly with AI.</p>
+
+            <div class="cards-section">
+                <div class="card">
+                    <h2>The Problem</h2>
+                    <ul>
+                        <li>Fake job postings trick job seekers.</li>
+                        <li>People lose time, money, and personal data.</li>
+                        <li>Most job portals do not verify postings.</li>
+                    </ul>
+                </div>
+
+                <div class="card">
+                    <h2>Our Solution</h2>
+                    <ul>
+                        <li>Detects fake jobs using Machine Learning + Rules.</li>
+                        <li>Shows clear confidence score.</li>
+                        <li>Minimal UI for instant analysis.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <span class="cta-line">Paste a job description below to check its authenticity!</span>
+        </section>
+
+        <!-- INPUT SECTION -->
+        <section class="input-section">
+            <h2>Analyze Job Posting</h2>
+
+            <form id="jobForm">
+                <div class="form-group">
+                    <label for="jobDescription">Job Description:</label>
+                    <textarea id="jobDescription" placeholder="Paste the job description here..." required></textarea>
+                    <small class="form-help">Full job text gives best results.</small>
+                </div>
+
+                <button type="submit" class="predict-button" id="predictBtn">
+                    Predict
+                </button>
+            </form>
+
+            <div id="resultSection" class="result-section" aria-live="polite"></div>
+        </section>
+    </div>
+
+<script>
+    const form = document.getElementById("jobForm");
+    const predictBtn = document.getElementById("predictBtn");
+    const resultSection = document.getElementById("resultSection");
+
+    form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const description = document.getElementById("jobDescription").value.trim();
+        if (!description) return alert("Please enter a job description.");
+
+        predictBtn.disabled = true;
+        predictBtn.textContent = "Analyzing...";
+        resultSection.className = "result-section";
+        resultSection.innerHTML = "";
+
+        try {
+            const resp = await fetch("http://localhost:5000/predict", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ description })
+            });
+
+            if (!resp.ok) {
+                const err = await resp.json().catch(() => ({}));
+                throw new Error(err.error || "Server error");
+            }
+
+            const data = await resp.json();
+            const pred = data.prediction || "Unknown";
+
+            // probability is already 0–100
+            const prob = (typeof data.probability === "number") ? data.probability + "%" : "N/A";
+
+            let category = "";
+            let message = "";
+
+            // ---------- CATEGORY LOGIC ----------
+            if (/high risk|fake/i.test(pred)) {
+                category = "high-risk";
+                message = `<p class="warning">🚨 Strong indicators of a fake job. Avoid applying!</p>`;
+            }
+            else if (/scam|potential/i.test(pred)) {
+                category = "suspicious";
+                message = `<p class="warning">⚠️ Multiple red flags detected. Be careful.</p>`;
+            }
+            else if (/suspicious/i.test(pred)) {
+                category = "caution";
+                message = `<p class="caution">🔍 Some concerns found. Verify before applying.</p>`;
+            }
+            else if (/likely legitimate|safe/i.test(pred)) {
+                category = "safe";
+                message = `<p class="safe">✅ No major red flags detected.</p>`;
+            }
+            else {
+                category = "very-safe";
+                message = `<p class="safe">✅ Very low risk. Appears legitimate.</p>`;
+            }
+
+            // ---------- DISPLAY RESULT ----------
+            resultSection.classList.add("show", category);
+            resultSection.innerHTML = `
+                <h3>${pred}</h3>
+                <p class="confidence">Confidence: ${prob}</p>
+                ${message}
+            `;
+
+        } catch (err) {
+            resultSection.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
+            resultSection.classList.add("show");
+        }
+        finally {
+            predictBtn.disabled = false;
+            predictBtn.textContent = "Predict";
+        }
+    });
+</script>
+
+</body>
+</html>
