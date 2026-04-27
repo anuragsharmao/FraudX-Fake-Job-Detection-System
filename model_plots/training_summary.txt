@@ -1,0 +1,43 @@
+
+================================================================================
+                    MODEL TRAINING COMPLETE - SUMMARY
+================================================================================
+
+Dataset Statistics:
+  - Total samples: 17880
+  - Legitimate jobs: 17014 (95.2%)
+  - Fraudulent jobs: 866 (4.8%)
+
+Feature Engineering:
+  - TF-IDF features: 5,000
+  - Hand-crafted features: 16
+  - Total features: 5016
+
+Model Performance (Test Set):
+  - Precision: 0.7606
+  - Recall: 0.8266
+  - F1-Score: 0.7922
+  - Specificity: 0.9868
+
+Decision Threshold:
+  - Optimal threshold: 0.8900
+  - Final F1-Score at threshold: 0.8302
+
+Visualizations Saved:
+  All plots have been saved to 'model_plots/' directory:
+    - 01_class_distribution.png (Original class balance)
+    - 02_class_distribution_smote.png (After SMOTE)
+    - 03_model_comparison.png (Performance comparison)
+    - 04_threshold_analysis.png (Threshold tuning)
+    - 05_confusion_matrix.png (Final confusion matrix)
+    - 06_roc_curves.png (ROC curves for all models)
+    - 07_pr_curves.png (Precision-Recall curves)
+    - 08_calibration_curve.png (Model calibration)
+    - 09_learning_curves.png (Learning curves)
+    - 10_rf_feature_importance.png (Feature importance)
+
+Model Saved:
+  - Location: models/fake_job_model.pkl
+  - Components: TF-IDF, 3 base models, meta-learner, parameters
+
+================================================================================

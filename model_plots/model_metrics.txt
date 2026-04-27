@@ -1,0 +1,22 @@
+FAKE JOB DETECTION MODEL - PERFORMANCE METRICS
+==================================================
+
+Optimal Threshold: 0.8900
+Final F1-Score: 0.8302
+
+Classification Report:
+              precision    recall  f1-score   support
+
+  Legitimate       0.99      1.00      0.99      3403
+  Fraudulent       0.91      0.76      0.83       173
+
+    accuracy                           0.98      3576
+   macro avg       0.95      0.88      0.91      3576
+weighted avg       0.98      0.98      0.98      3576
+
+
+Detailed Metrics:
+  Precision: 0.7606
+  Recall: 0.8266
+  F1-Score: 0.7922
+  Specificity: 0.9868
