@@ -5,3 +5,4 @@ scikit-learn==1.2.0
 nltk==3.7
 numpy==1.23.0
 requests>=2.25.1  # for testing
+groq==0.9.0

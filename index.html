@@ -3,143 +3,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FraudX - Fake Job Detection System</title>
-
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+    <title>FraudX — Advanced Fake Job Detection System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex flex-col">
 
-<body>
-    <div class="container">
-
-        <!-- HERO SECTION -->
-        <section class="hero">
-            <img src="fraudXlogo.jpg" alt="FraudX logo" class="site-logo">
-
-            <h1>Fake Job Detection System</h1>
-            <p class="tagline">Stay safe, apply smart — Detect fake jobs instantly with AI.</p>
-
-            <div class="cards-section">
-                <div class="card">
-                    <h2>The Problem</h2>
-                    <ul>
-                        <li>Fake job postings trick job seekers.</li>
-                        <li>People lose time, money, and personal data.</li>
-                        <li>Most job portals do not verify postings.</li>
-                    </ul>
-                </div>
-
-                <div class="card">
-                    <h2>Our Solution</h2>
-                    <ul>
-                        <li>Detects fake jobs using Machine Learning + Rules.</li>
-                        <li>Shows clear confidence score.</li>
-                        <li>Minimal UI for instant analysis.</li>
-                    </ul>
-                </div>
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="text-2xl font-black tracking-tight text-slate-900 uppercase">
+                    Fraud<span class="text-indigo-600">X</span>
+                </span>
+                <span class="text-xs bg-slate-100 text-slate-600 font-medium px-2 py-0.5 rounded border border-slate-200">
+                    Enterprise v1.2
+                </span>
             </div>
+            
+            <div class="flex items-center space-x-2 text-sm">
+                <span id="status-dot" class="h-2 w-2 rounded-full bg-amber-500 animate-pulse"></span>
+                <span id="status-text" class="text-slate-500 font-medium">Connecting to backend...</span>
+            </div>
+        </div>
+    </header>
 
-            <span class="cta-line">Paste a job description below to check its authenticity!</span>
-        </section>
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+        
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl border border-slate-200 shadow-xs p-6 h-full flex flex-col">
+                <h2 class="text-lg font-semibold text-slate-900 mb-1">Analyze Job Posting</h2>
+                <p class="text-sm text-slate-500 mb-6">Input the text details below. The FraudX system uses an ensemble architecture of Logistic Regression, Random Forest, and Gradient Boosting models to evaluate risk.</p>
+                
+                <form id="analyzer-form" class="space-y-5 flex-1 flex flex-col justify-between">
+                    <div class="space-y-5">
+                        <div>
+                            <label for="title" class="block text-sm font-medium text-slate-700 mb-1">Job Title</label>
+                            <input type="text" id="title" name="title" placeholder="e.g., Senior Data Scientist" 
+                                class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                        </div>
 
-        <!-- INPUT SECTION -->
-        <section class="input-section">
-            <h2>Analyze Job Posting</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="employment_type" class="block text-sm font-medium text-slate-700 mb-1">Employment Type</label>
+                                <select id="employment_type" name="employment_type" 
+                                    class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                                    <option value="">Select Option</option>
+                                    <option value="full-time">Full-time</option>
+                                    <option value="part-time">Part-time</option>
+                                    <option value="contract">Contract</option>
+                                    <option value="temporary">Temporary</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="required_experience" class="block text-sm font-medium text-slate-700 mb-1">Required Experience</label>
+                                <select id="required_experience" name="required_experience" 
+                                    class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                                    <option value="">Select Option</option>
+                                    <option value="entry level">Entry Level</option>
+                                    <option value="mid-senior level">Mid-Senior Level</option>
+                                    <option value="director">Director</option>
+                                    <option value="executive">Executive</option>
+                                </select>
+                            </div>
+                        </div>
 
-            <form id="jobForm">
-                <div class="form-group">
-                    <label for="jobDescription">Job Description:</label>
-                    <textarea id="jobDescription" placeholder="Paste the job description here..." required></textarea>
-                    <small class="form-help">Full job text gives best results.</small>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label for="salary_range" class="block text-sm font-medium text-slate-700 mb-1">Salary Range</label>
+                                <input type="text" id="salary_range" name="salary_range" placeholder="e.g., 90000-120000" 
+                                    class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                            </div>
+                            <div>
+                                <label for="required_education" class="block text-sm font-medium text-slate-700 mb-1">Required Education</label>
+                                <select id="required_education" name="required_education" 
+                                    class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs bg-white focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+                                    <option value="">Select Option</option>
+                                    <option value="high school or equivalent">High School</option>
+                                    <option value="bachelor's degree">Bachelor's Degree</option>
+                                    <option value="master's degree">Master's Degree</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <label class="relative flex items-start cursor-pointer">
+                                <input type="checkbox" id="telecommuting" name="telecommuting" value="1" class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5">
+                                <span class="ml-2 text-sm text-slate-600">Remote / Telecommute</span>
+                            </label>
+                            <label class="relative flex items-start cursor-pointer">
+                                <input type="checkbox" id="has_company_logo" name="has_company_logo" value="1" class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5">
+                                <span class="ml-2 text-sm text-slate-600">Includes Company Logo</span>
+                            </label>
+                            <label class="relative flex items-start cursor-pointer">
+                                <input type="checkbox" id="has_questions" name="has_questions" value="1" class="h-4 w-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 mt-0.5">
+                                <span class="ml-2 text-sm text-slate-600">Has Screening Questions</span>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-slate-700 mb-1">Job Description <span class="text-rose-500">*</span></label>
+                            <textarea id="description" name="description" rows="8" required placeholder="Paste the full body text of the job description here..." 
+                                class="w-full px-3.5 py-2 border border-slate-300 rounded-lg shadow-xs focus:outline-hidden focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center justify-end space-x-3 pt-6 border-t border-slate-100 mt-6">
+                        <button type="button" id="btn-clear" class="px-4 py-2 border border-slate-300 text-slate-700 bg-white font-medium rounded-lg text-sm hover:bg-slate-50 transition">
+                            Clear Form
+                        </button>
+                        <button type="submit" id="btn-submit" class="px-5 py-2 bg-indigo-600 text-white font-medium rounded-lg text-sm hover:bg-indigo-700 shadow-sm transition inline-flex items-center">
+                            Run Analysis Engine
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div id="results-panel" class="bg-white rounded-xl border border-slate-200 shadow-xs p-6 h-full flex flex-col justify-between">
+                
+                <div id="state-placeholder" class="flex flex-col items-center justify-center text-center my-auto py-12">
+                    <svg class="h-12 w-12 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <h3 class="text-sm font-semibold text-slate-800">Awaiting Input</h3>
+                    <p class="text-xs text-slate-400 mt-1 max-w-[200px]">Fill out the parameters and click run to yield analytical model diagnostics.</p>
                 </div>
 
-                <button type="submit" class="predict-button" id="predictBtn">
-                    Predict
-                </button>
-            </form>
+                <div id="state-loading" class="hidden flex-col items-center justify-center text-center my-auto py-12">
+                    <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                    <h3 class="text-sm font-semibold text-slate-800">Evaluating Signal Vectors...</h3>
+                    <p class="text-xs text-slate-400 mt-1">Parsing strings and calculating high-throughput Groq AI narrative summary.</p>
+                </div>
 
-            <div id="resultSection" class="result-section" aria-live="polite"></div>
-        </section>
-    </div>
+                <div id="state-results" class="hidden space-y-5 my-auto">
+                    <div class="border-b border-slate-100 pb-3">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block mb-1">System Verdict</span>
+                        <div id="verdict-tag" class="text-lg font-bold tracking-tight"></div>
+                    </div>
 
-<script>
-    const form = document.getElementById("jobForm");
-    const predictBtn = document.getElementById("predictBtn");
-    const resultSection = document.getElementById("resultSection");
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-xs font-medium text-slate-500">Calculated Fraud Probability</span>
+                            <span id="probability-badge" class="text-sm font-bold text-slate-900">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden">
+                            <div id="probability-bar" class="bg-indigo-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                    </div>
 
-    form.addEventListener("submit", async function (e) {
-        e.preventDefault();
+                    <div class="space-y-1 bg-indigo-50/50 border border-indigo-100 rounded-xl p-3.5">
+                        <div class="flex items-center space-x-1.5 mb-1">
+                            <svg class="h-4 w-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-indigo-900">FraudX GenAI Forensic Report</span>
+                        </div>
+                        <p id="llm-report-text" class="text-xs text-slate-700 leading-relaxed italic">
+                            Generating narrative analytical summary...
+                        </p>
+                    </div>
 
-        const description = document.getElementById("jobDescription").value.trim();
-        if (!description) return alert("Please enter a job description.");
+                    <div class="space-y-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Ensemble Matrix Probabilities</span>
+                        
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-150 text-xs space-y-2 font-mono">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Logistic Reg. (TF-IDF):</span>
+                                <span id="m-lr" class="text-slate-800 font-medium">0.0%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Random Forest Classifier:</span>
+                                <span id="m-rf" class="text-slate-800 font-medium">0.0%</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Gradient Boosting (XGB style):</span>
+                                <span id="m-gb" class="text-slate-800 font-medium">0.0%</span>
+                            </div>
+                            <div class="border-t border-slate-200 my-1 pt-1 flex justify-between font-sans text-sm font-medium">
+                                <span class="text-slate-600">Rule-based Flag Penalty:</span>
+                                <span id="m-rule" class="text-slate-800">0.0%</span>
+                            </div>
+                        </div>
+                    </div>
 
-        predictBtn.disabled = true;
-        predictBtn.textContent = "Analyzing...";
-        resultSection.className = "result-section";
-        resultSection.innerHTML = "";
+                    <div class="space-y-2">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400 block">Model Signals Log</span>
+                        <ul id="explanations-list" class="text-xs text-slate-600 space-y-1.5 list-disc pl-4"></ul>
+                    </div>
+                </div>
 
-        try {
-            const resp = await fetch("http://localhost:5000/predict", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ description })
-            });
+                <div class="border-t border-slate-100 pt-4 mt-auto text-[11px] text-slate-400 flex justify-between items-center">
+                    <span>Threshold: <span id="lbl-threshold">50</span>%</span>
+                    <span>System Node: Ready</span>
+                </div>
 
-            if (!resp.ok) {
-                const err = await resp.json().catch(() => ({}));
-                throw new Error(err.error || "Server error");
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-400">
+        &copy; 2026 FraudX Pipeline System. Confidential Client Server Analytics.
+    </footer>
+
+    <script>
+        const API_BASE = "http://localhost:5000";
+
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const form = document.getElementById('analyzer-form');
+        const clearBtn = document.getElementById('btn-clear');
+        
+        const statePlaceholder = document.getElementById('state-placeholder');
+        const stateLoading = document.getElementById('state-loading');
+        const stateResults = document.getElementById('state-results');
+
+        const verdictTag = document.getElementById('verdict-tag');
+        const probBadge = document.getElementById('probability-badge');
+        const probBar = document.getElementById('probability-bar');
+        const mLr = document.getElementById('m-lr');
+        const mRf = document.getElementById('m-rf');
+        const mGb = document.getElementById('m-gb');
+        const mRule = document.getElementById('m-rule');
+        const explanationsList = document.getElementById('explanations-list');
+        const lblThreshold = document.getElementById('lbl-threshold');
+        const llmReportText = document.getElementById('llm-report-text');
+
+        async function checkHealth() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                if(data.status === 'ok') {
+                    statusDot.className = "h-2 w-2 rounded-full bg-emerald-500";
+                    statusText.textContent = data.groq_pipeline_active ? "Engine & GenAI Connected" : "Engine Connected (AI Offline)";
+                    if (data.threshold) lblThreshold.textContent = data.threshold;
+                }
+            } catch (err) {
+                statusDot.className = "h-2 w-2 rounded-full bg-rose-500 animate-none";
+                statusText.textContent = "Connection Failure (Backend offline)";
             }
-
-            const data = await resp.json();
-            const pred = data.prediction || "Unknown";
-
-            // probability is already 0–100
-            const prob = (typeof data.probability === "number") ? data.probability + "%" : "N/A";
-
-            let category = "";
-            let message = "";
-
-            // ---------- CATEGORY LOGIC ----------
-            if (/high risk|fake/i.test(pred)) {
-                category = "high-risk";
-                message = `<p class="warning">🚨 Strong indicators of a fake job. Avoid applying!</p>`;
-            }
-            else if (/scam|potential/i.test(pred)) {
-                category = "suspicious";
-                message = `<p class="warning">⚠️ Multiple red flags detected. Be careful.</p>`;
-            }
-            else if (/suspicious/i.test(pred)) {
-                category = "caution";
-                message = `<p class="caution">🔍 Some concerns found. Verify before applying.</p>`;
-            }
-            else if (/likely legitimate|safe/i.test(pred)) {
-                category = "safe";
-                message = `<p class="safe">✅ No major red flags detected.</p>`;
-            }
-            else {
-                category = "very-safe";
-                message = `<p class="safe">✅ Very low risk. Appears legitimate.</p>`;
-            }
-
-            // ---------- DISPLAY RESULT ----------
-            resultSection.classList.add("show", category);
-            resultSection.innerHTML = `
-                <h3>${pred}</h3>
-                <p class="confidence">Confidence: ${prob}</p>
-                ${message}
-            `;
-
-        } catch (err) {
-            resultSection.innerHTML = `<p class="error">❌ Error: ${err.message}</p>`;
-            resultSection.classList.add("show");
         }
-        finally {
-            predictBtn.disabled = false;
-            predictBtn.textContent = "Predict";
-        }
-    });
-</script>
 
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            statePlaceholder.classList.add('hidden');
+            stateResults.classList.add('hidden');
+            stateLoading.classList.remove('hidden');
+
+            const formData = new FormData(form);
+            const payload = {
+                description: formData.get('description'),
+                title: formData.get('title') || "",
+                employment_type: formData.get('employment_type') || "",
+                required_experience: formData.get('required_experience') || "",
+                salary_range: formData.get('salary_range') || "",
+                required_education: formData.get('required_education') || "",
+                telecommuting: formData.get('telecommuting') ? "1" : "0",
+                has_company_logo: formData.get('has_company_logo') ? "1" : "0",
+                has_questions: formData.get('has_questions') ? "1" : "0"
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/predict`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(!response.ok) throw new Error('API Execution Error');
+
+                const data = await response.json();
+                renderResults(data);
+
+            } catch (err) {
+                alert("Could not process analysis. Verify your Flask app script is active on port 5000.");
+                statePlaceholder.classList.remove('hidden');
+                stateLoading.classList.add('hidden');
+            }
+        });
+
+        function renderResults(data) {
+            stateLoading.classList.add('hidden');
+            stateResults.classList.remove('hidden');
+
+            verdictTag.textContent = data.prediction;
+            if (data.flagged) {
+                verdictTag.className = "text-lg font-bold tracking-tight text-rose-600";
+                probBar.className = "bg-rose-600 h-2.5 rounded-full transition-all duration-500";
+            } else {
+                verdictTag.className = "text-lg font-bold tracking-tight text-emerald-600";
+                probBar.className = "bg-emerald-500 h-2.5 rounded-full transition-all duration-500";
+            }
+
+            probBadge.textContent = `${data.probability}%`;
+            probBar.style.width = `${data.probability}%`;
+            lblThreshold.textContent = data.decision_threshold;
+
+            llmReportText.textContent = data.llm_analysis || "Analytical baseline generated. No explicit corporate security narrative recorded.";
+
+            mLr.textContent = `${data.details.prob_lr}%`;
+            mRf.textContent = `${data.details.prob_rf}%`;
+            mGb.textContent = `${data.details.prob_gb}%`;
+            mRule.textContent = `${data.details.rule_score}%`;
+
+            explanationsList.innerHTML = "";
+            if(data.explanations && data.explanations.length > 0) {
+                data.explanations.forEach(text => {
+                    const li = document.createElement('li');
+                    li.textContent = text;
+                    explanationsList.appendChild(li);
+                });
+            } else {
+                explanationsList.innerHTML = `<span class="text-slate-400 italic">No anomalies or explicit trigger vectors flagged in raw content.</span>`;
+            }
+        }
+
+        clearBtn.addEventListener('click', () => {
+            form.reset();
+            stateResults.classList.add('hidden');
+            stateLoading.classList.add('hidden');
+            statePlaceholder.classList.remove('hidden');
+        });
+
+        checkHealth();
+    </script>
 </body>
 </html>
