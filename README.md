@@ -8,6 +8,8 @@
   <img src="https://img.shields.io/badge/Vercel-Serverless-000000?style=for-the-badge&logo=vercel&logoColor=white"/>
 </p>
 
+### 🔗 [Live Demo → fraud-x-fake-job-detection-system.vercel.app](https://fraud-x-fake-job-detection-system.vercel.app/)
+
 > **FraudX** is a production-grade, AI-powered system for detecting fraudulent job postings in real time. It combines a stacking ensemble of three machine learning models with a rule-based heuristic engine and a Groq-powered generative AI layer that produces executive-level forensic threat summaries — all served via a Flask REST API with a clean web frontend.
 
 ---
