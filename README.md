@@ -450,7 +450,7 @@ FraudX-Fake-Job-Detection-System/
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/FraudX-Fake-Job-Detection-System.git
+git clone https://github.com/anuragsharmao/FraudX-Fake-Job-Detection-System.git
 cd FraudX-Fake-Job-Detection-System
 ```
 
@@ -524,7 +524,7 @@ Open `index.html` in your browser **or** navigate to `http://localhost:5000` if 
 
 ### Vercel deployment steps
 
-1. Push your repository to GitHub.
+1. Push repository to GitHub.
 2. Import the project at [vercel.com/new](https://vercel.com/new).
 3. Set `GROQ_API_KEY` in **Project → Settings → Environment Variables**.
 4. Ensure `models/fake_job_model.pkl` is committed to the repository (or fetched from external storage on cold start).
@@ -566,7 +566,7 @@ Contributions are welcome. Please follow this workflow:
 
 1. Fork the repository and create a feature branch: `git checkout -b feature/your-feature`
 2. Make focused, well-scoped changes with clear commit messages.
-3. Test your changes locally by running `model.py` and verifying the `/predict` endpoint.
+3. Test changes locally by running `model.py` and verifying the `/predict` endpoint.
 4. Open a pull request with a description of what changed and why.
 
 **Ideas for contribution:**
