@@ -1,69 +1,588 @@
-# FraudX-Fake-Job-Detection-System
+# FraudX — Advanced Fake Job Detection System
 
-**FraudX** is a small project that demonstrates detecting fake job postings using a dataset of job ads and a lightweight Python app. It includes the dataset, a simple app (`app.py`), and a minimal frontend (`index.html`, `style.css`). This repository is designed for experimentation, learning, and as a starting point for more advanced fake-job-detection work.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.8%2B-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Flask-2.x-000000?style=for-the-badge&logo=flask&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Scikit--Learn-1.4%2B-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Groq_AI-LLaMA_3.1-00A67E?style=for-the-badge"/>
+  <img src="https://img.shields.io/badge/Vercel-Serverless-000000?style=for-the-badge&logo=vercel&logoColor=white"/>
+</p>
 
-**Contents**
-- **Project:** `FraudX-Fake-Job-Detection-System` — Fake job posting detection demo.
-- **Files:** `app.py`, `fake_job_postings.csv`, `index.html`, `style.css`, `requirements.txt`.
+> **FraudX** is a production-grade, AI-powered system for detecting fraudulent job postings in real time. It combines a stacking ensemble of three machine learning models with a rule-based heuristic engine and a Groq-powered generative AI layer that produces executive-level forensic threat summaries — all served via a Flask REST API with a clean web frontend.
 
-**Quick Links**
-- **Dataset:** `fake_job_postings.csv` — sample job postings labeled for fraud detection.
-- **App entry:** `app.py` — runs the demo application (see Requirements & Usage).
+---
 
-**Features**
-- **Dataset included:** A CSV of labeled job postings used for training/analysis.
-- **Demo app:** Example code that loads the data and performs a simple prediction/analysis workflow.
-- **Static frontend:** `index.html` and `style.css` for a minimal user interface.
+## Table of Contents
 
-**Requirements**
-- **Python:** 3.8+ recommended.
-- **Dependencies:** Listed in `requirements.txt` (install with `pip`).
+- [Project Overview](#project-overview)
+- [Live Demo & Interface](#live-demo--interface)
+- [System Architecture](#system-architecture)
+- [Machine Learning Pipeline](#machine-learning-pipeline)
+  - [Dataset](#dataset)
+  - [Feature Engineering](#feature-engineering)
+  - [Model Architecture — Stacking Ensemble](#model-architecture--stacking-ensemble)
+  - [Heuristic Rule Engine](#heuristic-rule-engine)
+  - [Training & Evaluation](#training--evaluation)
+- [Generative AI Layer (Groq + LLaMA 3.1)](#generative-ai-layer-groq--llama-31)
+- [API Reference](#api-reference)
+- [Frontend](#frontend)
+- [File Structure](#file-structure)
+- [Setup & Installation](#setup--installation)
+- [Deployment — Vercel Serverless](#deployment--vercel-serverless)
+- [Environment Variables](#environment-variables)
+- [Tech Stack](#tech-stack)
+- [Contributing](#contributing)
+- [License](#license)
 
-**Setup**
-1. Create and activate a virtual environment (PowerShell):
+---
 
+## Project Overview
+
+Online job fraud is a growing threat — fake listings harvest personal documents, extract upfront fees, and steal financial credentials from job seekers. **FraudX** addresses this by analyzing a job posting's text, structural metadata, and linguistic patterns to assign a real-time fraud probability score between 0–100%.
+
+**What makes FraudX different from a simple keyword filter:**
+
+- It combines **three independent ML models** in a stacking ensemble so that no single model's weakness dominates the verdict.
+- It layers a **rule-based heuristic engine** on top with 70+ curated high-risk and medium-risk keyword signals tuned for South Asian and global fraud patterns (UPI, Aadhar uploads, "binary plan", MLM, etc.).
+- It calls the **Groq Cloud API** (LLaMA 3.1-8B) to generate a natural-language forensic report explaining *why* the system flagged a posting — moving beyond opaque probability numbers.
+- It is structured for **serverless deployment** on Vercel, with cold-start optimizations and environment-based secret management.
+
+---
+
+## Live Demo & Interface
+
+The frontend (`index.html`) is a single-page application served alongside the Flask backend. Users fill in a form with the job posting details and click **Run Analysis Engine** to receive:
+
+| UI Element | Description |
+|---|---|
+| **Verdict Tag** | Plain-English label: `✅ Likely Legitimate`, `🔍 Suspicious`, `⚠️ Potential Scam`, `⚠️ High Risk - Potential Scam` |
+| **Fraud Probability Bar** | Visual 0–100% gauge with color coding (green → amber → red) |
+| **Sub-Model Metrics** | Individual scores from Logistic Regression, Random Forest, Gradient Boosting, and the Rule Engine |
+| **Trigger Flags** | List of specific anomalies detected (matched keywords, missing logo, remote scope, etc.) |
+| **FraudX AI Report** | A 3-sentence executive forensic narrative generated by LLaMA 3.1 via Groq |
+| **Live Status Indicator** | Backend health check showing whether the ML engine and GenAI pipeline are active |
+
+---
+
+## System Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                          │
+│   index.html  ←→  style.css  (Vanilla JS + Tailwind CSS)    │
+└─────────────────────────────┬────────────────────────────────┘
+                              │  HTTP POST /predict
+                              ▼
+┌──────────────────────────────────────────────────────────────┐
+│                    FLASK REST API  (app.py)                  │
+│                                                              │
+│  ┌─────────────────────────────────────────────────────┐     │
+│  │              INFERENCE PIPELINE                      │     │
+│  │                                                      │     │
+│  │  Raw Text + Metadata                                 │     │
+│  │       │                                              │     │
+│  │       ├──► Text Cleaning  (NLTK stopwords)          │     │
+│  │       ├──► TF-IDF Vectorizer  (5,000 features)      │     │
+│  │       ├──► Hand-crafted Features  (16 features)     │     │
+│  │       └──► Rule-based Heuristic Engine              │     │
+│  │                                                      │     │
+│  │       Combined Feature Matrix (5,016 dims)          │     │
+│  │             │                                       │     │
+│  │    ┌────────┼──────────┐                            │     │
+│  │    ▼        ▼          ▼                            │     │
+│  │   LR       RF         GB                            │     │
+│  │  prob     prob       prob                           │     │
+│  │    └────────┴──────────┘                            │     │
+│  │              │                                      │     │
+│  │         Meta-Learner                                │     │
+│  │     (Logistic Regression)                           │     │
+│  │              │                                      │     │
+│  │       Final Probability                             │     │
+│  │    + Heuristic Boost (if flagged)                   │     │
+│  └─────────────────────────────────────────────────────┘     │
+│                        │                                      │
+│                        ▼                                      │
+│         ┌──────────────────────────┐                         │
+│         │   GROQ CLOUD API         │                         │
+│         │   LLaMA 3.1-8B-Instant   │                         │
+│         │   (Forensic Narrative)   │                         │
+│         └──────────────────────────┘                         │
+│                        │                                      │
+│               JSON Response returned                         │
+└──────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+                     Client renders result
+```
+
+---
+
+## Machine Learning Pipeline
+
+### Dataset
+
+The model is trained on `fake_job_postings.csv`, a labeled dataset of job advertisements where each row is either legitimate (`fraudulent = 0`) or fraudulent (`fraudulent = 1`). The dataset is imbalanced — fraudulent listings are the minority class.
+
+**Key columns used:**
+
+| Column | Type | Description |
+|---|---|---|
+| `title` | Text | Job title string |
+| `description` | Text | Full job description body |
+| `company_profile` | Text | Company background (merged into combined text) |
+| `requirements` | Text | Skills/requirements section |
+| `benefits` | Text | Benefits/perks listed |
+| `salary_range` | String | Raw salary string (e.g., `"50000-80000"`) |
+| `telecommuting` | Binary | Whether role is remote |
+| `has_company_logo` | Binary | Whether a company logo was attached |
+| `has_questions` | Binary | Whether screening questions are included |
+| `employment_type` | Categorical | Full-time, Part-time, Contract, etc. |
+| `required_experience` | Categorical | Entry Level → Executive |
+| `required_education` | Categorical | High School → Doctorate |
+| `fraudulent` | Binary (target) | 0 = Legitimate, 1 = Fraudulent |
+
+**Class imbalance handling:** SMOTE (Synthetic Minority Oversampling Technique) is applied during training to balance the class distribution before fitting base models.
+
+---
+
+### Feature Engineering
+
+Each job posting is transformed into a **5,016-dimensional feature vector** by combining two feature types:
+
+#### 1. TF-IDF Text Features (5,000 dimensions)
+
+All text fields (`title`, `description`, `company_profile`, `requirements`, `benefits`) are concatenated into a single string, cleaned (lowercased, punctuation removed, NLTK stopwords stripped), and transformed with a **TF-IDF vectorizer** fitted on the training corpus with `max_features=5000`.
+
+#### 2. Hand-Crafted Structural Features (16 dimensions)
+
+These are domain-specific numerical signals engineered to capture fraud indicators beyond vocabulary:
+
+| # | Feature Name | Description |
+|---|---|---|
+| 1 | `has_salary_range` | Binary — whether a salary range is specified |
+| 2 | `salary_range_wide` | Binary — whether salary spread exceeds $100,000 (inflated bait) |
+| 3 | `telecommuting` | Binary — remote work flag |
+| 4 | `has_company_logo` | Binary — presence of verified brand asset |
+| 5 | `has_questions` | Binary — screening questions present |
+| 6 | `employment_type_enc` | Ordinal encoding of employment type |
+| 7 | `required_exp_enc` | Ordinal encoding (0=N/A → 5=Executive) |
+| 8 | `required_edu_enc` | Ordinal encoding (0=Unspecified → 5=Doctorate) |
+| 9 | `title_all_caps_ratio` | Fraction of uppercase chars in title (spam signal) |
+| 10 | `desc_exclamations` | Count of `!` in description (urgency manipulation) |
+| 11 | `num_high_kw` | Count of high-risk keyword matches |
+| 12 | `num_med_kw` | Count of medium-risk keyword matches |
+| 13 | `text_length_log` | Log-scaled text length (very short = suspicious) |
+| 14 | `avg_word_length` | Average word length in description |
+| 15 | `unique_word_ratio` | Vocabulary richness (low ratio = templated scam) |
+| 16 | `digit_ratio` | Proportion of digits (phone numbers, fees, etc.) |
+
+The TF-IDF matrix and hand-crafted feature array are horizontally stacked using `scipy.sparse.hstack` before being passed to the base models.
+
+---
+
+### Model Architecture — Stacking Ensemble
+
+FraudX uses a **two-level stacking ensemble**:
+
+#### Level 1 — Base Models (trained on full feature matrix)
+
+| Model | Library | Role |
+|---|---|---|
+| **Logistic Regression** (`lr`) | scikit-learn | Captures linear separability in TF-IDF space |
+| **Random Forest** (`rf`) | scikit-learn | Captures non-linear interactions, robust to outliers |
+| **Gradient Boosting** (`gb`) | scikit-learn | Captures structural mismatches and sequential patterns |
+
+Each model outputs a fraud probability (`p_lr`, `p_rf`, `p_gb`) for the input.
+
+#### Level 2 — Meta-Learner
+
+The three base-model probabilities are stacked into a `[p_lr, p_rf, p_gb]` vector and fed to a **Logistic Regression meta-classifier** that learns the optimal way to combine them.
+
+#### Heuristic Probability Boost
+
+After the meta-learner produces its probability, the rule engine score (`rscore`) is applied:
+
+```python
+if heuristic_flag_triggered:
+    meta_prob = max(meta_prob, min(0.97, meta_prob + rscore * 0.35))
+```
+
+This ensures that a posting containing explicit scam signals (e.g., "send money via Western Union", "upload Aadhar") always registers a high risk score even if the ML models are uncertain.
+
+#### Decision Threshold
+
+Rather than using 0.5 as the classification cutoff, the optimal threshold is determined during training by maximizing the **F1-score** on the validation set. This threshold is saved alongside the model and used at inference time.
+
+**Verdict buckets:**
+
+| Probability Range | Label |
+|---|---|
+| ≥ 70% | `⚠️ High Risk - Potential Scam` |
+| 40% – 69% | `⚠️ Potential Scam` |
+| 20% – 39% | `🔍 Suspicious` |
+| < 20% | `✅ Likely Legitimate` |
+
+---
+
+### Heuristic Rule Engine
+
+The rule engine runs independently and in parallel with the ML pipeline, scanning the raw (uncleaned) job text for:
+
+**High-Risk Keywords (70+ phrases, +0.4 score each):** Explicit fraud signals including payment demands (`"send money"`, `"wire transfer"`, `"UPI"`, `"crypto payment"`), identity theft vectors (`"upload Aadhar"`, `"provide passport copy"`, `"share OTP"`, `"CVV"`), get-rich-quick language (`"earn $"`, `"instant earnings"`, `"get rich"`), and fake employment schemes (`"multi level marketing"`, `"binary plan"`, `"sms sending job"`).
+
+**Medium-Risk Keywords (30 phrases, +0.15 score each):** Urgency and pressure tactics (`"urgent hiring"`, `"limited seats"`, `"act now"`), vague qualification signals (`"no experience"`, `"no skills required"`), and suspicious pay structures (`"commission only"`, `"weekly payout"`).
+
+**Linguistic Signals:** Two or more exclamation marks (+0.1), excessive capitalization — >10% of characters are uppercase (+0.1).
+
+Scores are capped at 1.0, and a posting is flagged if its rule score ≥ 0.6.
+
+---
+
+### Training & Evaluation
+
+Run `model.py` to train the full pipeline from scratch:
+
+```powershell
+python model.py
+```
+
+The training script executes a 12-step pipeline and saves **11 diagnostic visualizations** to the `model_plots/` directory:
+
+| Plot File | Description |
+|---|---|
+| `01_class_distribution.png` | Original class balance before SMOTE |
+| `02_class_distribution_smote.png` | Class balance after SMOTE resampling |
+| `03_model_comparison.png` | Precision / Recall / F1 / AUC for all 4 models |
+| `04_threshold_analysis.png` | F1-score vs threshold curve (optimal point highlighted) |
+| `05_confusion_matrix.png` | Final confusion matrix at optimal threshold |
+| `06_roc_curves.png` | ROC curves for LR, RF, GB, and Stacking Ensemble |
+| `07_pr_curves.png` | Precision-Recall curves for all models |
+| `08_calibration_curve.png` | Reliability diagram — predicted vs actual probability |
+| `09_learning_curves.png` | Bias-variance tradeoff analysis |
+| `10_rf_feature_importance.png` | Top feature importances from Random Forest |
+| `11_shap_summary.png` | SHAP value summary (requires `pip install shap`) |
+
+The final trained model is serialized to `models/fake_job_model.pkl` using `pickle`. The pickle file contains:
+
+```python
+{
+    'tfidf':               TF-IDF vectorizer,
+    'base_models':         (lr, rf, gb),
+    'meta_clf':            meta logistic regression,
+    'threshold':           optimal decision threshold (float),
+    'high_risk_kw':        list of high-risk keyword strings,
+    'medium_risk_kw':      list of medium-risk keyword strings,
+    'stop_words':          NLTK English stopwords set,
+    'feature_names':       list of 16 hand-crafted feature names,
+    'performance_metrics': dict of Precision, Recall, F1, Specificity,
+    'optimal_threshold':   same as threshold
+}
+```
+
+---
+
+## Generative AI Layer (Groq + LLaMA 3.1)
+
+After the ML pipeline produces its verdict, FraudX calls the **Groq Cloud API** with the `llama-3.1-8b-instant` model to generate a concise, executive-grade forensic narrative.
+
+The prompt is dynamically assembled with:
+- The consolidated verdict label and final fraud probability
+- Individual sub-model scores (LR, RF, GB percentages)
+- The list of heuristic trigger flags
+- The first 700 characters of the raw job description
+
+The model is instructed to act as *"FraudX AI, an elite enterprise cyber-forensics and threat intelligence analyst"* and produce a ≤90-word, 3-sentence risk summary in prose — no lists, no greetings — suitable for an executive security report.
+
+**If `GROQ_API_KEY` is not set**, the system gracefully degrades: the ML verdict and sub-model metrics are still returned; only the narrative summary field shows a standby message.
+
+---
+
+## API Reference
+
+The Flask server exposes three endpoints:
+
+### `GET /health`
+
+Returns system status. Called by the frontend on page load to set the connection indicator.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "model_ready": true,
+  "threshold": 42.5,
+  "groq_pipeline_active": true
+}
+```
+
+---
+
+### `POST /predict`
+
+Main inference endpoint. Accepts a JSON body and returns a full analysis result.
+
+**Request Body:**
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `description` | string | ✅ Yes | Full job description text |
+| `title` | string | No | Job title |
+| `employment_type` | string | No | `"full-time"`, `"part-time"`, `"contract"`, `"temporary"` |
+| `required_experience` | string | No | `"entry level"`, `"mid-senior level"`, `"director"`, `"executive"` |
+| `required_education` | string | No | `"high school or equivalent"`, `"bachelor's degree"`, `"master's degree"` |
+| `salary_range` | string | No | Raw string e.g. `"50000-80000"` |
+| `telecommuting` | string | No | `"1"` or `"0"` |
+| `has_company_logo` | string | No | `"1"` or `"0"` |
+| `has_questions` | string | No | `"1"` or `"0"` |
+
+**Example Request:**
+```json
+{
+  "description": "Earn $500 daily from home! No experience required. Send registration fee via PayPal...",
+  "title": "WORK FROM HOME AGENT",
+  "employment_type": "part-time",
+  "telecommuting": "1",
+  "has_company_logo": "0",
+  "has_questions": "0"
+}
+```
+
+**Example Response:**
+```json
+{
+  "prediction": "⚠️ High Risk - Potential Scam",
+  "probability": 94.3,
+  "decision_threshold": 42.5,
+  "flagged": true,
+  "details": {
+    "meta_prob": 94.3,
+    "prob_lr": 88.1,
+    "prob_rf": 91.4,
+    "prob_gb": 79.6,
+    "rule_score": 95.0
+  },
+  "explanations": [
+    "Matched high-risk strings: earn $, paypal, registration fee",
+    "Gradient Boosting pattern mismatch",
+    "Unverified remote operational scope",
+    "Omission of verified corporate brand identifier"
+  ],
+  "llm_analysis": "The posting presents multiple high-confidence fraud vectors...",
+  "model_ready": true
+}
+```
+
+---
+
+### `POST /reload`
+
+Forces the model to be reloaded from disk. Useful after replacing the `.pkl` file without restarting the server.
+
+```json
+{ "status": "success", "message": "Ensemble models loaded successfully." }
+```
+
+---
+
+## Frontend
+
+`index.html` is a self-contained SPA built with **Vanilla JavaScript** and **Tailwind CSS v4** (browser CDN — no build step required). It connects to the Flask backend at `window.location.origin`, making it trivially deployable alongside the API on any host.
+
+**Form fields match the `/predict` API exactly:**
+- Job Title (text)
+- Employment Type (select)
+- Required Experience (select)
+- Salary Range (text)
+- Required Education (select)
+- Remote / Telecommute (checkbox)
+- Includes Company Logo (checkbox)
+- Has Screening Questions (checkbox)
+- Job Description (textarea, required)
+
+`style.css` provides an alternative dark-theme stylesheet (cyberpunk-inspired: deep navy background, cyan accents) for the legacy/alternate UI layout.
+
+---
+
+## File Structure
+
+```
+FraudX-Fake-Job-Detection-System/
+│
+├── app.py                      # Flask REST API — inference server
+├── model.py                    # ML training pipeline — run once to build model
+├── index.html                  # Frontend SPA (Tailwind CSS + Vanilla JS)
+├── style.css                   # Dark-theme stylesheet (alternate UI)
+├── requirements.txt            # Python dependencies
+├── README.md                   # This file
+│
+├── fake_job_postings.csv       # Labeled training dataset
+│
+├── models/
+│   └── fake_job_model.pkl      # Serialized trained model (generated by model.py)
+│
+└── model_plots/                # Auto-generated training visualizations
+    ├── 01_class_distribution.png
+    ├── 02_class_distribution_smote.png
+    ├── 03_model_comparison.png
+    ├── 04_threshold_analysis.png
+    ├── 05_confusion_matrix.png
+    ├── 06_roc_curves.png
+    ├── 07_pr_curves.png
+    ├── 08_calibration_curve.png
+    ├── 09_learning_curves.png
+    ├── 10_rf_feature_importance.png
+    ├── 11_shap_summary.png       # Requires shap library
+    ├── model_metrics.txt
+    └── training_summary.txt
+```
+
+---
+
+## Setup & Installation
+
+### Prerequisites
+
+- Python 3.8 or higher
+- pip
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/FraudX-Fake-Job-Detection-System.git
+cd FraudX-Fake-Job-Detection-System
+```
+
+### 2. Create and activate a virtual environment
+
+**Windows (PowerShell):**
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 ```
 
-2. Install dependencies:
+**macOS / Linux:**
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+```
 
-```powershell
+### 3. Install dependencies
+
+```bash
 pip install -r requirements.txt
 ```
 
-**Running the App**
-- To run the demo app (if `app.py` is a Flask or script entrypoint), use:
+**Optional — for SHAP explainability plots:**
+```bash
+pip install shap
+```
 
-```powershell
+### 4. Train the model
+
+```bash
+python model.py
+```
+
+This creates `models/fake_job_model.pkl` and saves all diagnostic plots to `model_plots/`. Training takes 2–8 minutes depending on hardware.
+
+### 5. Set environment variables
+
+```bash
+# Required for Generative AI narrative summaries
+export GROQ_API_KEY="your_groq_api_key_here"
+
+# Windows PowerShell
+$env:GROQ_API_KEY = "your_groq_api_key_here"
+```
+
+Get a free API key at [console.groq.com](https://console.groq.com).
+
+### 6. Start the Flask server
+
+```bash
 python app.py
 ```
 
-- If the project uses a web frontend, open `index.html` in your browser or navigate to the local server address printed by `app.py`.
+The server starts on `http://localhost:5000`.
 
-**Dataset**
-- The dataset file `fake_job_postings.csv` contains job posting rows and labels indicating whether a posting is fraudulent. Use this file for training, evaluation, or exploration.
+### 7. Open the frontend
 
-**Usage Ideas**
-- Experiment with different models (sklearn, transformers) to improve detection accuracy.
-- Clean and engineer features from job description text, title, location fields, and company info.
-- Add cross-validation, model persistence, and a REST API to serve predictions.
-
-**Development**
-- Add tests, modularize `app.py` (extract model training, preprocessing, and serving code).
-- Consider moving notebooks, models, and experiments into dedicated folders: `notebooks/`, `models/`, `src/`.
-
-**Contributing**
-- Fork the repo, create a branch, make improvements, and open a pull request. Small, well-scoped changes are easiest to review.
-
-**License & Contact**
-- This repository has no license file by default. If you want to use or share this code widely, add a license (for example, `MIT`).
-- Questions or suggestions: open an issue or contact the maintainer via the repository.
+Open `index.html` in your browser **or** navigate to `http://localhost:5000` if Flask is configured to serve it statically.
 
 ---
 
-If you'd like, I can:
-- add a sample `requirements.txt` (if it's missing or incomplete),
-- run the app locally to confirm it starts, or
-- expand `app.py` into a modular package with tests.
+## Deployment — Vercel Serverless
+
+`app.py` is structured for serverless deployment on **Vercel**. Key design decisions:
+
+- `app.run()` is **never called in production** — Vercel uses its own WSGI handler.
+- `load_model()` is called at **module parse time** for cold-start optimization — the model is pre-loaded before the first request arrives.
+- If the model is not loaded when a request comes in (e.g., after a cold start), each endpoint attempts a lazy reload before responding.
+- The `GROQ_API_KEY` is read from **Vercel Environment Variables** — never hardcoded.
+
+### Vercel deployment steps
+
+1. Push your repository to GitHub.
+2. Import the project at [vercel.com/new](https://vercel.com/new).
+3. Set `GROQ_API_KEY` in **Project → Settings → Environment Variables**.
+4. Ensure `models/fake_job_model.pkl` is committed to the repository (or fetched from external storage on cold start).
+5. Deploy — Vercel auto-detects the Flask WSGI app.
+
+> **Note:** The `.pkl` file may be large. For production, consider storing it in an S3-compatible bucket and downloading it on first load, or use Vercel's file system integration.
+
+---
+
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `GROQ_API_KEY` | Optional | Groq Cloud API key for LLaMA 3.1 narrative generation. If absent, AI summaries are skipped gracefully. |
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| **Language** | Python 3.8+ |
+| **Web Framework** | Flask + Flask-CORS |
+| **ML / Data** | scikit-learn, pandas, NumPy, SciPy |
+| **NLP** | NLTK (stopwords), TF-IDF Vectorization |
+| **Class Balancing** | SMOTE (imbalanced-learn) |
+| **Visualization** | Matplotlib, Seaborn |
+| **Explainability** | SHAP (optional) |
+| **Generative AI** | Groq Cloud API — `llama-3.1-8b-instant` |
+| **Frontend** | Vanilla JavaScript, Tailwind CSS v4 (CDN) |
+| **Serialization** | Python `pickle` |
+| **Deployment** | Vercel Serverless (WSGI) |
+
+---
+
+## Contributing
+
+Contributions are welcome. Please follow this workflow:
+
+1. Fork the repository and create a feature branch: `git checkout -b feature/your-feature`
+2. Make focused, well-scoped changes with clear commit messages.
+3. Test your changes locally by running `model.py` and verifying the `/predict` endpoint.
+4. Open a pull request with a description of what changed and why.
+
+**Ideas for contribution:**
+- Add cross-validation to `model.py` for more robust evaluation.
+- Replace `pickle` serialization with `joblib` for larger models.
+- Add a `/batch` endpoint to score multiple postings in one API call.
+- Integrate a transformer-based encoder (e.g., `sentence-transformers`) to replace or augment TF-IDF.
+- Add unit tests for `build_features()` and `rule_score()`.
+- Build a Streamlit or Gradio demo as an alternative to the HTML frontend.
+
+---
+
+## License
+
+This repository does not include a license file. If you intend to use, distribute, or build on this code, please add a license. The **MIT License** is recommended for open projects.
+
+---
+
+<p align="center">
+  Built with Python, scikit-learn, Flask, and Groq AI &nbsp;·&nbsp; FraudX Pipeline System &copy; 2026
+</p>
