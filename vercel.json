@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "server.py", "use": "@vercel/python" }
+  ],
+  "routes": [
+    { "src": "/(health|predict|reload)", "dest": "server.py" },
+    { "src": "/(.*)", "dest": "index.html" }
+  ]
+}
